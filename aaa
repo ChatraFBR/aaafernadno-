@@ -26,11 +26,22 @@ Vagrant.configure("2") do |config|
     web.vm.network "private_network", ip: "192.168.56.20"
     web.vm.provision "shell", inline: <<-SHELL
       apt-get update
-      apt-get install -y apache2 openssl
+      apt-get install -y apache2 openssl vsftpd
+
+      # --- Certificado SSL ---
       mkdir /etc/apache2/ssl
       openssl req -newkey rsa:2048 -nodes -keyout /etc/apache2/ssl/apache.key -x509 -days 365 -out /etc/apache2/ssl/apache.crt -subj "/CN=localhost"
+      echo "Certificado SSL generado en /etc/apache2/ssl/"
+      
+      # --- Certificado FTP ---
+      mkdir /etc/vsftpd/ssl
+      openssl req -newkey rsa:2048 -nodes -keyout /etc/vsftpd/ssl/ftp.key -x509 -days 365 -out /etc/vsftpd/ssl/ftp.crt -subj "/CN=ftp.localhost"
+      echo "Certificado FTP generado en /etc/vsftpd/ssl/"
+      
       systemctl enable apache2
       systemctl start apache2
+      systemctl enable vsftpd
+      systemctl start vsftpd
     SHELL
   end
 end
